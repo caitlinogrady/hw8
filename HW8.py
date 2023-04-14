@@ -15,7 +15,7 @@ def load_rest_data(db):
 	and each inner key is a dictionary, where the key:value pairs should be the category, 
 	building, and rating for the restaurant.
 	"""
-	nn = sqlite3.connect(db)
+	conn = sqlite3.connect(db)
 	cur = conn.cursor()
 	cur.execute('SELECT * FROM restaurants')
 	outer = {}
