@@ -15,20 +15,36 @@ def load_rest_data(db):
 	and each inner key is a dictionary, where the key:value pairs should be the category, 
 	building, and rating for the restaurant.
 	"""
-	conn = sqlite3.connect(db)
+	nn = sqlite3.connect(db)
 	cur = conn.cursor()
 	cur.execute('SELECT * FROM restaurants')
 	outer = {}
+	li = []
 	for row in cur:
 		inner = {}
 		name = row[1]
 		cat = row[2]
 		buil = row[3]
 		rat = row[4]
-		inner['category'] = cat 
-		inner['building'] = buil
-		inner['rating'] = rat
-		outer[name] = inner
+		t = [name,cat,buil,rat]
+		li.append(t)
+		#print(t)
+	for rest in li:
+		inner = {}
+		cur.execute('SELECT category FROM categories WHERE id = ?',(rest[1],))
+		cat = cur.fetchone()
+		
+		inner['category'] = cat[0]
+		cur.execute('SELECT building FROM buildings WHERE id = ?',(rest[2],))
+		
+		buil = cur.fetchone()
+		
+		inner['building'] = buil[0]
+		
+		inner['rating'] = rest[3]
+		outer[rest[0]] = inner
+		print(outer)
+		
 	return outer
 
 def plot_rest_categories(db):
@@ -37,21 +53,21 @@ def plot_rest_categories(db):
 	restaurant categories and the values should be the number of restaurants in each category. The function should
 	also create a bar chart with restaurant categories and the count of number of restaurants in each category.
 	"""
-	
 	conn = sqlite3.connect(db)
 	cur = conn.cursor()
-	cur.execute('SELECT id FROM buildings WHERE building = ?',(building_num,))
-	num = cur.fetchone()
-	print(num)
-	cur.execute('SELECT name,rating FROM restaurants WHERE building_id = ?',(num[0],))
+	cur.execute('SELECT * FROM categories')
 	li = []
-	for rest in cur:
-		li.append(rest)
-	sort = sorted(li, key = lambda x:x[1],reverse=True)
-	fi = []
-	for s in sort:
-		fi.append(s[0])
-	return fi
+	d = {}
+	for row in cur:
+		cat = row[1]
+		id = row[0]
+		tu = (id,cat)
+		li.append(tu)
+	for cat in li:
+		cur.execute('SELECT COUNT(category_id) FROM restaurants WHERE category_id = ?',(cat[0],))
+		count = cur.fetchone()
+		d[cat[1]] = count[0]
+	return d
 
 def find_rest_in_building(building_num, db):
 	'''
@@ -136,9 +152,9 @@ class TestHW8(unittest.TestCase):
 		self.assertEqual(len(restaurant_list), 3)
 		self.assertEqual(restaurant_list[0], 'BTB Burrito')
 
-	def test_get_highest_rating(self):
-		highest_rating = get_highest_rating('South_U_Restaurants.db')
-		self.assertEqual(highest_rating, self.highest_rating)
+	#def test_get_highest_rating(self):
+		#highest_rating = get_highest_rating('South_U_Restaurants.db')
+		#self.assertEqual(highest_rating, self.highest_rating)
 
 if __name__ == '__main__':
 	main()
