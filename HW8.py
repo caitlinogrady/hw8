@@ -67,6 +67,23 @@ def plot_rest_categories(db):
 		cur.execute('SELECT COUNT(category_id) FROM restaurants WHERE category_id = ?',(cat[0],))
 		count = cur.fetchone()
 		d[cat[1]] = count[0]
+	x = []
+	y = []
+	newt = []
+	for c,num in d.items():
+		newt.append((c,num))
+	new = sorted(newt, key = lambda x:x[1])
+	for t in new:
+		x.append(t[0])
+		y.append(t[1])
+		
+	plt.barh(x,y)
+	plt.xlabel("Number of Restaurants")
+	plt.ylabel("Categories")
+	plt.title("Number of Restaurants in Each Category")
+	
+	plt.show()
+	
 	return d
 
 def find_rest_in_building(building_num, db):
